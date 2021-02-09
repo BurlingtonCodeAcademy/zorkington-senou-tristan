@@ -45,7 +45,7 @@ class Room {
       console.log(`This tool box has already been open`);
     }
   }
-  
+
   revealMap() {
     if (this.toolbox === "open") {
       this.secretItem = "map";
@@ -61,11 +61,14 @@ class Room {
     if (this.secretItem === "map") {
       player.inventory.push(this.secretItem);
       console.log(`You just put a map in your inventory`); //map message to player
+    } else if (!this.items) {
+      console.log(`You already took the ${this.items}`);
+    } else {
+      //the default operation for this method is to pop off the current item in the room's array
+      let poppedItem = this.items.pop();
+      player.inventory.push(poppedItem); //send the value of the .pop() to player inventory
+      console.log(`You just added a ${poppedItem} to your inventory`); //message to user of what item they just placed in their inventory
     }
-    //the default operation for this method is to pop off the current item in the room's array
-    let poppedItem = this.items.pop();
-    player.inventory.push(poppedItem); //send the value of the .pop() to player inventory
-    console.log(`You just added ${this.items} to your inventory`); //message to user of what item they just placed in their inventory
   }
 
   exit() {
@@ -147,7 +150,7 @@ let roomOne = new Room(
 );
 
 let streetRoomOne = new Room(
-  "Light blinds you but your eyes adjust.\nAn empty street sprawls out before you.\mYou see a notebook on the bench.",
+  "Light blinds you but your eyes adjust.\nAn empty street sprawls out before you.mYou see a notebook on the bench.",
   "",
   ["notebook"],
   ["car", "bench", "bird"]
@@ -239,12 +242,23 @@ async function start() {
     else if (answer === "take") {
       console.log(`Oh nice a bat`);
       roomOne.sendItems(); //calls room method sending item to player inventory
+      console.log({ roomOne });
     } else if (answer === "display inventory") {
       console.log("You have these items in your inventory:");
       player.inventory.forEach(function (item) {
         //displays current player inventory
         console.log(item);
       });
+    } else if (answer.trim() === "drop") {
+      let dropItem = await ask(
+        `What item would you like to drop? Type item name\n>_`
+      );
+
+      let droppedItem = player.inventory.filter((item) =>
+        item.toLowerCase().trim().includes("bat")
+      );
+      droppedItem.push(roomOne.items);
+      console.log({ roomOne });
     }
     //Exit Room section of the block
     else if (answer.trim() === "open door") {
@@ -253,7 +267,7 @@ async function start() {
         console.log(`This door has already been unlocked, proceed`);
         nextStreetRoomOne();
       }
-    //Must enter password correctly to exit room//Once exited, room stays open. 
+      //Must enter password correctly to exit room//Once exited, room stays open.
       let unlockDoor = await ask(
         "The door has a passcode. If you know it, enter it now.\n>_"
       );
@@ -730,11 +744,12 @@ async function nextCaveTwo() {
       }
     }
     //Exit Room
-    else if(answer.trim() === "forward"){
-      console.log("The orb seems to breathe, growing larger and larger. The light becomes brighter and brighter until the you can't bear to open your eyes again. Suddenly, you feel a wave of ecstacy wash over you. This is meant to be. It always was meant to be. You walk towards the orb and become one with it. You don a robe and kneel with the rest of the figures. Your sense of adventure compels you to stay right here. Where you've always belonged. ")
-      process.exit()
-    }
-    else if (answer.trim() === "backward") {
+    else if (answer.trim() === "forward") {
+      console.log(
+        "The orb seems to breathe, growing larger and larger. The light becomes brighter and brighter until the you can't bear to open your eyes again.\nSuddenly, you feel a wave of ecstasy wash over you. This is meant to be.\nIt always was meant to be. You walk towards the orb and become one with it. You don a robe and kneel with the rest of the figures.\nYour sense of adventure compels you to stay right here. Where you've always belonged. "
+      );
+      process.exit();
+    } else if (answer.trim() === "backward") {
       //This will send you back to roomOne
       console.log(
         "After everything you've been through you're going to back out now?\nHave fun starting over."
